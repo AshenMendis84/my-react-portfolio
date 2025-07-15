@@ -1,18 +1,24 @@
 // Save this file at: src/components/SingleItemViewer.jsx
 // This component wraps Google's <model-viewer>.
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Import the <model-viewer> library
 import '@google/model-viewer';
 
 export default function SingleItemViewer({ furnitureData }) {
+    const modelViewerRef = useRef(null); // Create a ref to hold the DOM element
     const [selectedModel, setSelectedModel] = useState(furnitureData[0]?.url || '');
 
+    // This effect runs whenever the selectedModel state changes.
     useEffect(() => {
-        // This is needed to define the custom element in the browser
-        // after it has been imported.
-    }, []);
+        // We check if the ref is attached to an element.
+        if (modelViewerRef.current) {
+            // We directly set the 'src' property on the DOM element.
+            // This is the reliable way to update a web component's properties in React.
+            modelViewerRef.current.src = selectedModel;
+        }
+    }, [selectedModel]); // The effect depends on selectedModel
 
     return (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -34,8 +40,11 @@ export default function SingleItemViewer({ furnitureData }) {
                 </div>
             </div>
             <div className="h-96 relative bg-gray-200">
-                <model-viewer 
-                    src={selectedModel}
+                {/* Attach the ref here. We no longer need to pass the 'src' prop directly in the JSX,
+                  as the useEffect hook now handles it.
+                */}
+                <model-viewer
+                    ref={modelViewerRef}
                     alt="A 3D model"
                     ar
                     ar-modes="webxr scene-viewer quick-look"
@@ -53,7 +62,8 @@ export default function SingleItemViewer({ furnitureData }) {
                         position: 'absolute',
                         bottom: '16px',
                         right: '16px',
-                        border: 'none'
+                        border: 'none',
+                        cursor: 'pointer'
                     }}>
                         View in AR
                     </button>
