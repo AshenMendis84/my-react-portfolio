@@ -1,30 +1,23 @@
 // Save this file at: src/components/SingleItemViewer.jsx
-// This component wraps Google's <model-viewer>.
+// This component uses a key-based re-rendering strategy for reliability.
 
-import React, { useState, useEffect, useRef } from 'react';
-
-// Import the <model-viewer> library
+import React, { useState, useEffect } from 'react';
+// Import the web component library directly
 import '@google/model-viewer';
 
 export default function SingleItemViewer({ furnitureData }) {
-    const modelViewerRef = useRef(null); // Create a ref to hold the DOM element
     const [selectedModel, setSelectedModel] = useState(furnitureData[0]?.url || '');
 
-    // This effect runs whenever the selectedModel state changes.
+    // The useEffect is no longer strictly necessary with the key prop,
+    // but it's good practice to ensure the custom element is defined.
     useEffect(() => {
-        // We check if the ref is attached to an element.
-        if (modelViewerRef.current) {
-            // We directly set the 'src' property on the DOM element.
-            // This is the reliable way to update a web component's properties in React.
-            modelViewerRef.current.src = selectedModel;
-        }
-    }, [selectedModel]); // The effect depends on selectedModel
+    }, []);
 
     return (
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
             <div className="p-4 border-b">
                 <h2 className="text-xl font-bold text-gray-700">1. Single Item AR Viewer</h2>
-                <p className="text-sm text-gray-500">Uses Google &lt;model-viewer&gt; for quick placement.</p>
+                <p className="text-sm text-gray-500">Uses a key prop to ensure model re-rendering.</p>
                 <div className="mt-4">
                     <label htmlFor="furniture-select-single" className="block text-sm font-medium text-gray-700 mb-1">Select Model:</label>
                     <select 
@@ -40,11 +33,13 @@ export default function SingleItemViewer({ furnitureData }) {
                 </div>
             </div>
             <div className="h-96 relative bg-gray-200">
-                {/* Attach the ref here. We no longer need to pass the 'src' prop directly in the JSX,
-                  as the useEffect hook now handles it.
+                {/* By adding a `key` that changes when the model URL changes, we are telling React 
+                  to destroy the old <model-viewer> component and create a brand new one. 
+                  This forces it to re-initialize with the new `src` and is a very reliable pattern.
                 */}
                 <model-viewer
-                    ref={modelViewerRef}
+                    key={selectedModel} // The key is the magic here!
+                    src={selectedModel}
                     alt="A 3D model"
                     ar
                     ar-modes="webxr scene-viewer quick-look"
